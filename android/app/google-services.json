@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "331942412830",
+    "firebase_url": "https://storagex-2532c-default-rtdb.firebaseio.com",
+    "project_id": "storagex-2532c",
+    "storage_bucket": "storagex-2532c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331942412830:android:cc1f7203d39e6144e8e40f",
+        "android_client_info": {
+          "package_name": "com.example.boilerplate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "331942412830-otdg793lrt0g483hpoa06qf2v5g9k28i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaE5XZD4u_QGd6Q41enXcvRGPZf2IjGRA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "331942412830-otdg793lrt0g483hpoa06qf2v5g9k28i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

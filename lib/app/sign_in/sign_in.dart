@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boilerplate/services/firebase_auth.dart';
 
 const mainColor = Color(0xff2470c7);
 
@@ -15,7 +16,7 @@ class Loginpage extends StatefulWidget {
 }
 
 class _LoginpageState extends State<Loginpage> {
-  String email, password;
+  String email = "owner@email.com", password = "storagex";
   Widget _buildLogo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -23,7 +24,7 @@ class _LoginpageState extends State<Loginpage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Text(
-            'StorageX',
+            'Title',
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 25,
               fontWeight: FontWeight.bold,
@@ -40,6 +41,7 @@ class _LoginpageState extends State<Loginpage> {
       padding: EdgeInsets.only(right: 40, top: 40, left: 40),
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
+        initialValue: "owner@email.com",
         onChanged: (value) {
           setState(() {
             email = value;
@@ -60,6 +62,7 @@ class _LoginpageState extends State<Loginpage> {
       padding: EdgeInsets.symmetric(horizontal: 40),
       child: TextFormField(
         keyboardType: TextInputType.text,
+        initialValue: "storagex",
         obscureText: true,
         onChanged: (value) {
           setState(() {
@@ -105,7 +108,9 @@ class _LoginpageState extends State<Loginpage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30.0),
             ),
-            onPressed: () {},
+            onPressed: () async {
+              await FirebaseAuthUser().signIn(email, password);
+            },
             child: Text(
               "Login",
               style: TextStyle(
