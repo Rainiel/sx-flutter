@@ -3,20 +3,20 @@ import 'package:boilerplate/services/firebase_auth.dart';
 
 const mainColor = Color(0xff2470c7);
 
-class SignIn extends StatelessWidget {
+class SignUp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Loginpage());
+    return Scaffold(body: RegisterPage());
   }
 }
 
-class Loginpage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   @override
-  _LoginpageState createState() => _LoginpageState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginpageState extends State<Loginpage> {
-  String email = "owner@email.com", password = "storagex";
+class _RegisterPageState extends State<RegisterPage> {
+  String pnumber = "";
   Widget _buildLogo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -41,10 +41,9 @@ class _LoginpageState extends State<Loginpage> {
       padding: EdgeInsets.only(right: 40, top: 40, left: 40),
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
-        initialValue: "owner@email.com",
         onChanged: (value) {
           setState(() {
-            email = value;
+            pnumber = value;
           });
         },
         decoration: InputDecoration(
@@ -62,12 +61,11 @@ class _LoginpageState extends State<Loginpage> {
       padding: EdgeInsets.symmetric(horizontal: 40),
       child: TextFormField(
         keyboardType: TextInputType.text,
-        initialValue: "storagex",
         obscureText: true,
         onChanged: (value) {
-          setState(() {
-            password = value;
-          });
+          // setState(() {
+          //   password = value;
+          // });
         },
         decoration: InputDecoration(
           prefixIcon: Icon(
@@ -80,16 +78,25 @@ class _LoginpageState extends State<Loginpage> {
     );
   }
 
-  Widget _buildForgetPasswordButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        FlatButton(
-          onPressed: () {},
-          child: Text("Forgot Password"),
+  Widget _buildConfirmPasswordRow() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 40),
+      child: TextFormField(
+        keyboardType: TextInputType.text,
+        obscureText: true,
+        onChanged: (value) {
+          // setState(() {
+          //   password = value;
+          // });
+        },
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            Icons.lock,
+            color: mainColor,
+          ),
+          labelText: 'Confirm Password',
         ),
-      ],
+      ),
     );
   }
 
@@ -109,10 +116,11 @@ class _LoginpageState extends State<Loginpage> {
               borderRadius: BorderRadius.circular(30.0),
             ),
             onPressed: () async {
-              await FirebaseAuthUser().signIn(email, password);
+              var value = await FirebaseAuthUser().signInUsingNumber(pnumber);
+              print("Rainiel $value");
             },
             child: Text(
-              "Login",
+              "Register",
               style: TextStyle(
                 color: Colors.white,
                 letterSpacing: 1.5,
@@ -147,7 +155,7 @@ class _LoginpageState extends State<Loginpage> {
                   padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height / 15),
                   child: Text(
-                    "Login",
+                    "Register",
                     style: TextStyle(
                       fontSize: MediaQuery.of(context).size.height / 30,
                     ),
@@ -155,10 +163,8 @@ class _LoginpageState extends State<Loginpage> {
                 ),
                 _buildPhoneNumberRow(),
                 _buildPasswordRow(),
-                // _buildForgetPasswordButton(),
+                _buildConfirmPasswordRow(),
                 _buildLoginButton(),
-                // _buildOrRow(),
-                // _buildSocialBtnRow(),
               ],
             ),
           ),
@@ -174,9 +180,7 @@ class _LoginpageState extends State<Loginpage> {
         Padding(
           padding: EdgeInsets.only(top: 40),
           child: FlatButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed("/signup");
-            },
+            onPressed: () {},
             child: RichText(
               text: TextSpan(children: [
                 TextSpan(
@@ -229,7 +233,7 @@ class _LoginpageState extends State<Loginpage> {
               children: <Widget>[
                 _buildLogo(),
                 _buildContainer(),
-                _buildSignUpBtn(),
+                // _buildSignUpBtn(),
               ],
             )
           ],

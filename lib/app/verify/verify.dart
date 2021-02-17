@@ -3,20 +3,20 @@ import 'package:boilerplate/services/firebase_auth.dart';
 
 const mainColor = Color(0xff2470c7);
 
-class SignIn extends StatelessWidget {
+class Verify extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Loginpage());
+    return Scaffold(body: Phone());
   }
 }
 
-class Loginpage extends StatefulWidget {
+class Phone extends StatefulWidget {
   @override
-  _LoginpageState createState() => _LoginpageState();
+  _PhoneState createState() => _PhoneState();
 }
 
-class _LoginpageState extends State<Loginpage> {
-  String email = "owner@email.com", password = "storagex";
+class _PhoneState extends State<Phone> {
+  String pnumber = "";
   Widget _buildLogo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -41,10 +41,9 @@ class _LoginpageState extends State<Loginpage> {
       padding: EdgeInsets.only(right: 40, top: 40, left: 40),
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
-        initialValue: "owner@email.com",
         onChanged: (value) {
           setState(() {
-            email = value;
+            pnumber = value;
           });
         },
         decoration: InputDecoration(
@@ -54,42 +53,6 @@ class _LoginpageState extends State<Loginpage> {
             ),
             labelText: 'Phone number'),
       ),
-    );
-  }
-
-  Widget _buildPasswordRow() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40),
-      child: TextFormField(
-        keyboardType: TextInputType.text,
-        initialValue: "storagex",
-        obscureText: true,
-        onChanged: (value) {
-          setState(() {
-            password = value;
-          });
-        },
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            Icons.lock,
-            color: mainColor,
-          ),
-          labelText: 'Password',
-        ),
-      ),
-    );
-  }
-
-  Widget _buildForgetPasswordButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        FlatButton(
-          onPressed: () {},
-          child: Text("Forgot Password"),
-        ),
-      ],
     );
   }
 
@@ -109,10 +72,10 @@ class _LoginpageState extends State<Loginpage> {
               borderRadius: BorderRadius.circular(30.0),
             ),
             onPressed: () async {
-              await FirebaseAuthUser().signIn(email, password);
+              await FirebaseAuthUser().signInUsingNumber(pnumber);
             },
             child: Text(
-              "Login",
+              "Confirm",
               style: TextStyle(
                 color: Colors.white,
                 letterSpacing: 1.5,
@@ -147,55 +110,15 @@ class _LoginpageState extends State<Loginpage> {
                   padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height / 15),
                   child: Text(
-                    "Login",
+                    "Register",
                     style: TextStyle(
                       fontSize: MediaQuery.of(context).size.height / 30,
                     ),
                   ),
                 ),
                 _buildPhoneNumberRow(),
-                _buildPasswordRow(),
-                // _buildForgetPasswordButton(),
                 _buildLoginButton(),
-                // _buildOrRow(),
-                // _buildSocialBtnRow(),
               ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSignUpBtn() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(top: 40),
-          child: FlatButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed("/signup");
-            },
-            child: RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                  text: 'Dont have an account? ',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: MediaQuery.of(context).size.height / 40,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                TextSpan(
-                  text: 'Sign Up',
-                  style: TextStyle(
-                    color: mainColor,
-                    fontSize: MediaQuery.of(context).size.height / 40,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ]),
             ),
           ),
         ),
@@ -229,7 +152,6 @@ class _LoginpageState extends State<Loginpage> {
               children: <Widget>[
                 _buildLogo(),
                 _buildContainer(),
-                _buildSignUpBtn(),
               ],
             )
           ],
