@@ -16,7 +16,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  String pnumber = "";
+  String pnumber = "+639388041681";
   Widget _buildLogo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -41,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: EdgeInsets.only(right: 40, top: 40, left: 40),
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
+        initialValue: "+639388041681",
         onChanged: (value) {
           setState(() {
             pnumber = value;
@@ -117,7 +118,9 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             onPressed: () async {
               var value = await FirebaseAuthUser().signInUsingNumber(pnumber);
-              print("Rainiel $value");
+              if(value == "code sent"){
+                Navigator.of(context).pushNamed("/verifyNumber");
+              }
             },
             child: Text(
               "Register",
@@ -162,8 +165,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 _buildPhoneNumberRow(),
-                _buildPasswordRow(),
-                _buildConfirmPasswordRow(),
+                // _buildPasswordRow(),
+                // _buildConfirmPasswordRow(),
                 _buildLoginButton(),
               ],
             ),

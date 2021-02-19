@@ -20,16 +20,18 @@ class FirebaseAuthUser {
   }
 
   Future signInUsingNumber(number) async {
-    // final completer = Completer<AuthCredential>();
+    final completer = Completer<String>();
     await auth.verifyPhoneNumber(
       phoneNumber: number,
       verificationCompleted: (PhoneAuthCredential credential) {
         print("verification completed $number");
-        // completer.complete;
+        completer.complete("Completed");
+        // return "completed";
       },
       verificationFailed: (FirebaseAuthException e) {
         print("verification failed $number, $e");
-        // completer.completeError;
+        completer.completeError("Error");
+        // return "failed";
       },
       codeSent: (String verificationId, int resendToken) async {
         print("verification code sent $number $verificationId $resendToken");
@@ -37,11 +39,14 @@ class FirebaseAuthUser {
         //     PhoneAuthProvider.credential(
         //         verificationId: verificationId, smsCode: smsCode);
         // await auth.signInWithCredential(phoneAuthCredential);
+        completer.complete("code sent");
+        return "code sent";
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         print("verification code auto retreival timeout $number");
+        return "retrieval";
       },
     );
-    return "Rainiel v";
+    return completer.future;
   }
 }

@@ -24,7 +24,7 @@ class _PhoneState extends State<Phone> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Text(
-            'StorageX',
+            'Verify',
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 25,
               fontWeight: FontWeight.bold,
