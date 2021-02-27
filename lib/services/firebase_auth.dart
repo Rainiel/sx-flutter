@@ -3,6 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 
+class User {
+  var sent;
+  var vid;
+}
+
+String vid;
+
 class FirebaseAuthUser {
   final auth = FirebaseAuth.instance;
   Future<void> signIn(email, password) async {
@@ -20,7 +27,8 @@ class FirebaseAuthUser {
   }
 
   Future signInUsingNumber(number) async {
-    final completer = Completer<String>();
+    final completer = Completer<Object>();
+    // var user = new User();
     await auth.verifyPhoneNumber(
       phoneNumber: number,
       verificationCompleted: (PhoneAuthCredential credential) {
@@ -39,14 +47,21 @@ class FirebaseAuthUser {
         //     PhoneAuthProvider.credential(
         //         verificationId: verificationId, smsCode: smsCode);
         // await auth.signInWithCredential(phoneAuthCredential);
+        vid = verificationId;
         completer.complete("code sent");
-        return "code sent";
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         print("verification code auto retreival timeout $number");
-        return "retrieval";
+        // return "retrieval";
       },
     );
     return completer.future;
+  }
+
+  Future signInWithCode(smsCode) async {
+    PhoneAuthCredential phoneAuthCredential =
+        PhoneAuthProvider.credential(verificationId: vid, smsCode: smsCode);
+    await auth.signInWithCredential(phoneAuthCredential);
+    return "success";
   }
 }

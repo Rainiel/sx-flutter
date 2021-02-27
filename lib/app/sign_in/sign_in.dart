@@ -16,7 +16,9 @@ class Loginpage extends StatefulWidget {
 }
 
 class _LoginpageState extends State<Loginpage> {
-  String email = "owner@email.com", password = "storagex";
+  String email = "owner@email.com",
+      password = "storagex",
+      pnumber = "+639388041681";
   Widget _buildLogo() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -41,10 +43,10 @@ class _LoginpageState extends State<Loginpage> {
       padding: EdgeInsets.only(right: 40, top: 40, left: 40),
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
-        initialValue: "owner@email.com",
+        initialValue: "+639388041681",
         onChanged: (value) {
           setState(() {
-            email = value;
+            pnumber = value;
           });
         },
         decoration: InputDecoration(
@@ -109,7 +111,10 @@ class _LoginpageState extends State<Loginpage> {
               borderRadius: BorderRadius.circular(30.0),
             ),
             onPressed: () async {
-              await FirebaseAuthUser().signIn(email, password);
+              var value = await FirebaseAuthUser().signInUsingNumber(pnumber);
+              if (value == "code sent") {
+                Navigator.of(context).pushNamed("/verifyNumber");
+              }
             },
             child: Text(
               "Login",
@@ -154,7 +159,7 @@ class _LoginpageState extends State<Loginpage> {
                   ),
                 ),
                 _buildPhoneNumberRow(),
-                _buildPasswordRow(),
+                // _buildPasswordRow(),
                 // _buildForgetPasswordButton(),
                 _buildLoginButton(),
                 // _buildOrRow(),

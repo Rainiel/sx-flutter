@@ -24,7 +24,7 @@ class _PhoneState extends State<Phone> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Text(
-            'Verify',
+            'StorageX',
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 25,
               fontWeight: FontWeight.bold,
@@ -51,7 +51,7 @@ class _PhoneState extends State<Phone> {
               Icons.phone,
               color: mainColor,
             ),
-            labelText: 'Phone number'),
+            labelText: 'Code'),
       ),
     );
   }
@@ -72,7 +72,10 @@ class _PhoneState extends State<Phone> {
               borderRadius: BorderRadius.circular(30.0),
             ),
             onPressed: () async {
-              await FirebaseAuthUser().signInUsingNumber(pnumber);
+              var code = await FirebaseAuthUser().signInWithCode(pnumber);
+              if (code == "success") {
+                Navigator.pop(context);
+              }
             },
             child: Text(
               "Confirm",
@@ -110,7 +113,7 @@ class _PhoneState extends State<Phone> {
                   padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height / 15),
                   child: Text(
-                    "Register",
+                    "Enter Code",
                     style: TextStyle(
                       fontSize: MediaQuery.of(context).size.height / 30,
                     ),
