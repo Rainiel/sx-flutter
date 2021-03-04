@@ -1,4 +1,5 @@
 import 'package:boilerplate/app/sign_up/sign_up.dart';
+import 'package:boilerplate/app/stepper/stepper.dart';
 import 'package:boilerplate/app/verify/verify.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:boilerplate/app/home/tabs.dart';
 import 'package:boilerplate/app/sign_in/sign_in.dart';
 import 'package:boilerplate/app/page1/page1.dart';
-import 'dart:developer';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/page1': (BuildContext context) => Page1(),
         '/signup': (BuildContext context) => SignUp(),
         '/home': (BuildContext context) => TabsPage(),
+        '/stepper': (BuildContext context) => StepperPage(),
       },
     );
   }
