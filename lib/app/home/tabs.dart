@@ -1,3 +1,4 @@
+import 'package:boilerplate/app/stepper/stepper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -8,12 +9,41 @@ class TabsPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<TabsPage> {
+  int _selectedIndex = 0;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Startup Name Generator')),
       drawer: CustomDrawer(),
       body: Body(),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Reserve',
+            backgroundColor: Colors.red,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business),
+            label: 'Claim',
+            backgroundColor: Colors.green,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school),
+            label: 'School',
+            backgroundColor: Colors.purple,
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
+      ),
     );
   }
 }
@@ -65,47 +95,33 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  var titles = [];
   final icons = IconData(0xe593, fontFamily: 'MaterialIcons');
-
-  _getData() async {
-    List array = [];
-    await FirebaseDatabase.instance
-        .reference()
-        .child("device")
-        .once()
-        .then((DataSnapshot snapshot) {
-      Map<dynamic, dynamic>.from(snapshot.value).forEach((key, values) {
-        array.add({"id": key, ...values});
-      });
-    });
-    setState(() {
-      print(array);
-      titles = array;
-    });
-  }
-
-  @override
-  Future<void> initState() {
-    super.initState();
-    _getData();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: titles.length,
-      itemBuilder: (context, index) {
-        return Card(
-          child: ListTile(
-            leading: Icon(icons),
-            title: Text(titles[index]["location"]),
-            onTap: () {
-              Navigator.of(context).pushNamed("/stepper");
-            },
-          ),
-        );
-      },
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed("/stepper");
+          },
+          child: Text('RESERVE A LOCKER'),
+        ),
+        Expanded(
+            child: Container(
+                // margin: EdgeInsets.all(30),
+                child: ListView.builder(
+          itemCount: 2,
+          itemBuilder: (context, index) {
+            return Card(
+              child: ListTile(
+                leading: Icon(icons),
+                title: Text("Transaction"),
+              ),
+            );
+          },
+        ))),
+      ],
     );
   }
 }

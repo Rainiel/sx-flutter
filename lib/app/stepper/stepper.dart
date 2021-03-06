@@ -13,8 +13,9 @@ class _TabsPageState extends State<StepperPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Storage X ')),
-      drawer: CustomDrawer(),
+      // drawer: CustomDrawer(),
       body: Body(),
+      bottomNavigationBar: BottomNav(),
     );
   }
 }
@@ -66,8 +67,12 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  int _currentStep = 0;
+  static int _currentStep = 0;
   var colorG = Colors.green[400];
+  var devices = [];
+  var selectedDevice;
+  final icons = IconData(0xe593, fontFamily: 'MaterialIcons');
+
   StepperType stepperType = StepperType.vertical;
   switchStepsType() {
     setState(() => stepperType == StepperType.vertical
@@ -87,6 +92,29 @@ class _BodyState extends State<Body> {
     _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
   }
 
+  _getData() async {
+    List array = [];
+    await FirebaseDatabase.instance
+        .reference()
+        .child("device")
+        .once()
+        .then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic>.from(snapshot.value).forEach((key, values) {
+        array.add({"id": key, ...values, "selected": false});
+      });
+    });
+    setState(() {
+      print(array);
+      devices = array;
+    });
+  }
+
+  @override
+  void initState() {
+    _getData();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -97,10 +125,65 @@ class _BodyState extends State<Body> {
               type: StepperType.horizontal,
               physics: ScrollPhysics(),
               currentStep: _currentStep,
-              onStepTapped: (step) => tapped(step),
-              onStepContinue: continued,
-              onStepCancel: cancel,
+              // onStepTapped: (step) => tapped(step),
+              // onStepContinue: continued,
+              // onStepCancel: cancel,
+              controlsBuilder: (BuildContext context,
+                  {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+                return Row(
+                  children: <Widget>[
+                    Container(
+                      child: null,
+                    ),
+                    Container(
+                      child: null,
+                    ),
+                  ],
+                );
+              },
               steps: <Step>[
+                Step(
+                  title: new Text('Devices'),
+                  content: Stack(children: [
+                    Expanded(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: devices.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            shape: devices[index]["selected"]
+                                ? new RoundedRectangleBorder(
+                                    side: new BorderSide(
+                                        color: Colors.blue, width: 2.0),
+                                    borderRadius: BorderRadius.circular(4.0))
+                                : new RoundedRectangleBorder(
+                                    side: new BorderSide(
+                                        color: Colors.white, width: 2.0),
+                                    borderRadius: BorderRadius.circular(4.0)),
+                            child: ListTile(
+                              leading: Icon(icons),
+                              title: Text(devices[index]["location"]),
+                              trailing: Checkbox(
+                                  value: devices[index]["selected"],
+                                  onChanged: (value) {}),
+                              onTap: () {
+                                setState(() {
+                                  devices[index]["selected"] =
+                                      !devices[index]["selected"];
+                                  selectedDevice = devices[index];
+                                });
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ]),
+                  isActive: _currentStep >= 0,
+                  state: _currentStep >= 0
+                      ? StepState.complete
+                      : StepState.disabled,
+                ),
                 Step(
                   title: new Text('Info'),
                   content: Column(
@@ -121,7 +204,7 @@ class _BodyState extends State<Body> {
                     ],
                   ),
                   isActive: _currentStep >= 0,
-                  state: _currentStep >= 0
+                  state: _currentStep >= 1
                       ? StepState.complete
                       : StepState.disabled,
                 ),
@@ -141,44 +224,93 @@ class _BodyState extends State<Body> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               InkWell(
-                                onTap: () => setState(() => colorG = Colors.teal[500]),
+                                onTap: () =>
+                                    setState(() => colorG = Colors.teal[500]),
                                 child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.40,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
                                   height: 40,
                                   // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(left: 8),
-                                  child: Text('Box 2'),
+                                  margin: EdgeInsets.only(right: 4, bottom: 8),
+                                  child: Text('Box 1'),
                                   color: colorG,
                                 ),
                               ),
                               InkWell(
                                 onTap: () => print("Container 2 pressed"),
                                 child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.40,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
                                   height: 40,
                                   // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(left: 8),
-                                  child: Text('Box 1'),
+                                  margin: EdgeInsets.only(left: 4, bottom: 8),
+                                  child: Text('Box 2'),
+                                  color: Colors.teal[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              InkWell(
+                                onTap: () =>
+                                    setState(() => colorG = Colors.teal[500]),
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  height: 40,
+                                  // padding: EdgeInsets.all(8),
+                                  margin: EdgeInsets.only(right: 4, bottom: 8),
+                                  child: Text('Box 3'),
+                                  color: colorG,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => print("Container 2 pressed"),
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  height: 40,
+                                  // padding: EdgeInsets.all(8),
+                                  margin: EdgeInsets.only(left: 4, bottom: 8),
+                                  child: Text('Box 4'),
+                                  color: Colors.teal[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              InkWell(
+                                onTap: () =>
+                                    setState(() => colorG = Colors.teal[500]),
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  height: 40,
+                                  // padding: EdgeInsets.all(8),
+                                  margin: EdgeInsets.only(right: 4, bottom: 8),
+                                  child: Text('Box 5'),
+                                  color: colorG,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => print("Container 2 pressed"),
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  height: 40,
+                                  // padding: EdgeInsets.all(8),
+                                  margin: EdgeInsets.only(left: 4, bottom: 8),
+                                  child: Text('Box 6'),
                                   color: Colors.teal[500],
                                 ),
                               ),
                             ],
                           ),
                         ],
-                      ),
-                    ],
-                  ),
-                  isActive: _currentStep >= 0,
-                  state: _currentStep >= 1
-                      ? StepState.complete
-                      : StepState.disabled,
-                ),
-                Step(
-                  title: new Text('Mobile Number'),
-                  content: Column(
-                    children: <Widget>[
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'Mobile Number'),
                       ),
                     ],
                   ),
@@ -192,6 +324,30 @@ class _BodyState extends State<Body> {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+class BottomNav extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Reserve',
+          backgroundColor: Colors.red,
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.business),
+          label: 'Next',
+          backgroundColor: Colors.green,
+        ),
+      ],
+      currentIndex: _BodyState._currentStep,
+      selectedItemColor: Colors.amber[800],
+      // onTap: _onItemTapped,
     );
   }
 }
