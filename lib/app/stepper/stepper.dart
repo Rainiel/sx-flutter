@@ -67,7 +67,7 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  static int _currentStep = 0;
+  int _currentStep = 0;
   var colorG = Colors.green[400];
   var devices = [];
   var selectedDevice;
@@ -328,7 +328,6 @@ class _BodyState extends State<Body> {
   }
 }
 
-
 class BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -336,7 +335,7 @@ class BottomNav extends StatelessWidget {
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Reserve',
+          label: 'Cancel',
           backgroundColor: Colors.red,
         ),
         BottomNavigationBarItem(
@@ -345,9 +344,9 @@ class BottomNav extends StatelessWidget {
           backgroundColor: Colors.green,
         ),
       ],
-      currentIndex: _BodyState._currentStep,
-      selectedItemColor: Colors.amber[800],
-      // onTap: _onItemTapped,
+      currentIndex: 1,
+      // selectedItemColor: Colors.amber[800],
+      // onTap: _BodyState.continued(),
     );
   }
 }
