@@ -9,13 +9,24 @@ class StepperPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<StepperPage> {
+  int _currentStep = 0;
+
+  continued() {
+    _currentStep < 2 ? setState(() => _currentStep += 1) : null;
+  }
+
+  cancel() {
+    _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Storage X ')),
       // drawer: CustomDrawer(),
-      body: Body(),
-      bottomNavigationBar: BottomNav(),
+      body: Body(_currentStep),
+      bottomNavigationBar:
+          BottomNav(continued: continued, cancel: cancel, step: _currentStep),
     );
   }
 }
@@ -61,36 +72,46 @@ class CustomDrawer extends StatelessWidget {
   }
 }
 
+class BodyInstance {
+  var device;
+  var info;
+  var locker;
+
+  getValue() {
+    return {"device": device, "info": info, "locker": locker};
+  }
+}
+
 class Body extends StatefulWidget {
+  int _currentStep;
+  Body(this._currentStep);
+
   @override
   _BodyState createState() => _BodyState();
 }
 
 class _BodyState extends State<Body> {
-  int _currentStep = 0;
+  // int _currentStep = 0;
+  // var selectedDevice;
+  var myInstance = new BodyInstance();
   var colorG = Colors.green[400];
   var devices = [];
-  var selectedDevice;
+  var box = [
+    [
+      {"box": 1, "status": false},
+      {"box": 2, "status": false}
+    ],
+    [
+      {"box": 3, "status": false},
+      {"box": 4, "status": false}
+    ],
+    [
+      {"box": 5, "status": false},
+      {"box": 6, "status": false}
+    ]
+  ];
+  var selectedBoxIndex = null;
   final icons = IconData(0xe593, fontFamily: 'MaterialIcons');
-
-  StepperType stepperType = StepperType.vertical;
-  switchStepsType() {
-    setState(() => stepperType == StepperType.vertical
-        ? stepperType = StepperType.horizontal
-        : stepperType = StepperType.vertical);
-  }
-
-  tapped(int step) {
-    setState(() => _currentStep = step);
-  }
-
-  continued() {
-    _currentStep < 2 ? setState(() => _currentStep += 1) : null;
-  }
-
-  cancel() {
-    _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
-  }
 
   _getData() async {
     List array = [];
@@ -124,7 +145,7 @@ class _BodyState extends State<Body> {
             child: Stepper(
               type: StepperType.horizontal,
               physics: ScrollPhysics(),
-              currentStep: _currentStep,
+              currentStep: widget._currentStep,
               // onStepTapped: (step) => tapped(step),
               // onStepContinue: continued,
               // onStepCancel: cancel,
@@ -144,43 +165,41 @@ class _BodyState extends State<Body> {
               steps: <Step>[
                 Step(
                   title: new Text('Devices'),
-                  content: Stack(children: [
-                    Expanded(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: devices.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            shape: devices[index]["selected"]
-                                ? new RoundedRectangleBorder(
-                                    side: new BorderSide(
-                                        color: Colors.blue, width: 2.0),
-                                    borderRadius: BorderRadius.circular(4.0))
-                                : new RoundedRectangleBorder(
-                                    side: new BorderSide(
-                                        color: Colors.white, width: 2.0),
-                                    borderRadius: BorderRadius.circular(4.0)),
-                            child: ListTile(
-                              leading: Icon(icons),
-                              title: Text(devices[index]["location"]),
-                              trailing: Checkbox(
-                                  value: devices[index]["selected"],
-                                  onChanged: (value) {}),
-                              onTap: () {
-                                setState(() {
-                                  devices[index]["selected"] =
-                                      !devices[index]["selected"];
-                                  selectedDevice = devices[index];
-                                });
-                              },
-                            ),
-                          );
-                        },
-                      ),
+                  content: Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: devices.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          shape: devices[index]["selected"]
+                              ? new RoundedRectangleBorder(
+                                  side: new BorderSide(
+                                      color: Colors.blue, width: 2.0),
+                                  borderRadius: BorderRadius.circular(4.0))
+                              : new RoundedRectangleBorder(
+                                  side: new BorderSide(
+                                      color: Colors.white, width: 2.0),
+                                  borderRadius: BorderRadius.circular(4.0)),
+                          child: ListTile(
+                            leading: Icon(icons),
+                            title: Text(devices[index]["location"]),
+                            trailing: Checkbox(
+                                value: devices[index]["selected"],
+                                onChanged: (value) {}),
+                            onTap: () {
+                              setState(() {
+                                devices[index]["selected"] =
+                                    !devices[index]["selected"];
+                                myInstance.device = devices[index];
+                              });
+                            },
+                          ),
+                        );
+                      },
                     ),
-                  ]),
-                  isActive: _currentStep >= 0,
-                  state: _currentStep >= 0
+                  ),
+                  isActive: widget._currentStep >= 0,
+                  state: widget._currentStep >= 0
                       ? StepState.complete
                       : StepState.disabled,
                 ),
@@ -203,119 +222,231 @@ class _BodyState extends State<Body> {
                       ),
                     ],
                   ),
-                  isActive: _currentStep >= 0,
-                  state: _currentStep >= 1
+                  isActive: widget._currentStep >= 0,
+                  state: widget._currentStep >= 1
                       ? StepState.complete
                       : StepState.disabled,
                 ),
                 Step(
                   title: new Text('Locker'),
-                  // content: Container(
-                  //   padding: const EdgeInsets.all(8),
-                  //   child: Text('Box 1'),
-                  //   color: Colors.teal[500],
+                  content: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: box.length,
+                      itemBuilder: (context, index) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () => {
+                                if (selectedBoxIndex == null)
+                                  {
+                                    setState(() => {
+                                          selectedBoxIndex = index,
+                                          box[index][0]["status"] = true
+                                        })
+                                  }
+                                else
+                                  {
+                                    setState(() => {
+                                          box[selectedBoxIndex][0]["status"] =
+                                              false,
+                                          box[selectedBoxIndex][1]["status"] =
+                                              false,
+                                          selectedBoxIndex = index,
+                                          box[index][0]["status"] = true
+                                        })
+                                  }
+                              },
+                              child: Container(
+                                  decoration: box[index][0]["status"] == true
+                                      ? BoxDecoration(
+                                          color: Colors.green[400],
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)))
+                                      : BoxDecoration(
+                                          color: Colors.teal[400],
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10))),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.40,
+                                  height: 50,
+                                  margin: EdgeInsets.only(right: 4, bottom: 8),
+                                  child: Container(
+                                    child: Center(
+                                        child: Text(
+                                            box[index][0]["box"].toString())),
+                                  )),
+                            ),
+                            GestureDetector(
+                              onTap: () => {
+                                if (selectedBoxIndex == null)
+                                  {
+                                    setState(() => {
+                                          selectedBoxIndex = index,
+                                          box[index][1]["status"] = true
+                                        })
+                                  }
+                                else
+                                  {
+                                    setState(() => {
+                                          box[selectedBoxIndex][0]["status"] =
+                                              false,
+                                          box[selectedBoxIndex][1]["status"] =
+                                              false,
+                                          selectedBoxIndex = index,
+                                          box[index][1]["status"] = true
+                                        })
+                                  }
+                              },
+                              child: Container(
+                                decoration: box[index][1]["status"] == true
+                                    ? BoxDecoration(
+                                        color: Colors.green[400],
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)))
+                                    : BoxDecoration(
+                                        color: Colors.teal[400],
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10))),
+                                width: MediaQuery.of(context).size.width * 0.40,
+                                height: 50,
+                                margin: EdgeInsets.only(left: 4, bottom: 8),
+                                child: Container(
+                                  child: Center(
+                                      child: Text(
+                                          box[index][1]["box"].toString())),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                  // content: Stack(
+                  //   children: <Widget>[
+                  //     Column(
+                  //       mainAxisAlignment: MainAxisAlignment.center,
+                  //       children: <Widget>[
+                  //         Row(
+                  //           mainAxisAlignment: MainAxisAlignment.center,
+                  //           children: <Widget>[
+                  //             InkWell(
+                  //               onTap: () =>
+                  //                   setState(() => colorG = Colors.teal[500]),
+                  //               child: Container(
+                  //                   decoration: BoxDecoration(
+                  //                       color: colorG,
+                  //                       borderRadius: BorderRadius.all(
+                  //                           Radius.circular(10))),
+                  //                   width: MediaQuery.of(context).size.width *
+                  //                       0.40,
+                  //                   height: 40,
+                  //                   margin:
+                  //                       EdgeInsets.only(right: 4, bottom: 8),
+                  //                   child: Container(
+                  //                     child: Center(child: Text("box1")),
+                  //                   )),
+                  //             ),
+                  //             InkWell(
+                  //               onTap: () => print("Container 2 pressed"),
+                  //               child: Container(
+                  //                 decoration: BoxDecoration(
+                  //                     color: colorG,
+                  //                     borderRadius: BorderRadius.all(
+                  //                         Radius.circular(10))),
+                  //                 width:
+                  //                     MediaQuery.of(context).size.width * 0.40,
+                  //                 height: 40,
+                  //                 margin: EdgeInsets.only(left: 4, bottom: 8),
+                  //                 child: Container(
+                  //                   child: Center(child: Text("box1")),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //         Row(
+                  //           mainAxisAlignment: MainAxisAlignment.center,
+                  //           children: <Widget>[
+                  //             InkWell(
+                  //               onTap: () =>
+                  //                   setState(() => colorG = Colors.teal[500]),
+                  //               child: Container(
+                  //                 decoration: BoxDecoration(
+                  //                     color: colorG,
+                  //                     borderRadius: BorderRadius.all(
+                  //                         Radius.circular(10))),
+                  //                 width:
+                  //                     MediaQuery.of(context).size.width * 0.40,
+                  //                 height: 40,
+                  //                 margin: EdgeInsets.only(right: 4, bottom: 8),
+                  //                 child: Container(
+                  //                   child: Center(child: Text("box1")),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //             InkWell(
+                  //               onTap: () => print("Container 2 pressed"),
+                  //               child: Container(
+                  //                 decoration: BoxDecoration(
+                  //                     color: colorG,
+                  //                     borderRadius: BorderRadius.all(
+                  //                         Radius.circular(10))),
+                  //                 width:
+                  //                     MediaQuery.of(context).size.width * 0.40,
+                  //                 height: 40,
+                  //                 margin: EdgeInsets.only(left: 4, bottom: 8),
+                  //                 child: Container(
+                  //                   child: Center(child: Text("box1")),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //         Row(
+                  //           mainAxisAlignment: MainAxisAlignment.center,
+                  //           children: <Widget>[
+                  //             InkWell(
+                  //               onTap: () =>
+                  //                   setState(() => colorG = Colors.teal[500]),
+                  //               child: Container(
+                  //                 decoration: BoxDecoration(
+                  //                                                         color: colorG,
+                  //                     borderRadius: BorderRadius.all(
+                  //                         Radius.circular(10))),
+                  //                 width:
+                  //                     MediaQuery.of(context).size.width * 0.40,
+                  //                 height: 40,
+                  //                 margin: EdgeInsets.only(right: 4, bottom: 8),
+                  //                 child: Container(
+                  //                   child: Center(child: Text("box1")),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //             InkWell(
+                  //               onTap: () => {print(myInstance.getValue())},
+                  //               child: Container(
+                  //                 decoration: BoxDecoration(
+                  //                     color: colorG,
+                  //                     borderRadius: BorderRadius.all(
+                  //                         Radius.circular(10))),
+                  //                 width:
+                  //                     MediaQuery.of(context).size.width * 0.40,
+                  //                 height: 40,
+                  //                 margin: EdgeInsets.only(left: 4, bottom: 8),
+                  //                 child: Container(
+                  //                   child: Center(child: Text("box1")),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ],
                   // ),
-                  content: Stack(
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                onTap: () =>
-                                    setState(() => colorG = Colors.teal[500]),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
-                                  height: 40,
-                                  // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(right: 4, bottom: 8),
-                                  child: Text('Box 1'),
-                                  color: colorG,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => print("Container 2 pressed"),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
-                                  height: 40,
-                                  // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(left: 4, bottom: 8),
-                                  child: Text('Box 2'),
-                                  color: Colors.teal[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                onTap: () =>
-                                    setState(() => colorG = Colors.teal[500]),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
-                                  height: 40,
-                                  // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(right: 4, bottom: 8),
-                                  child: Text('Box 3'),
-                                  color: colorG,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => print("Container 2 pressed"),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
-                                  height: 40,
-                                  // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(left: 4, bottom: 8),
-                                  child: Text('Box 4'),
-                                  color: Colors.teal[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                onTap: () =>
-                                    setState(() => colorG = Colors.teal[500]),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
-                                  height: 40,
-                                  // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(right: 4, bottom: 8),
-                                  child: Text('Box 5'),
-                                  color: colorG,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => print("Container 2 pressed"),
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
-                                  height: 40,
-                                  // padding: EdgeInsets.all(8),
-                                  margin: EdgeInsets.only(left: 4, bottom: 8),
-                                  child: Text('Box 6'),
-                                  color: Colors.teal[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  isActive: _currentStep >= 0,
-                  state: _currentStep >= 2
+
+                  isActive: widget._currentStep >= 0,
+                  state: widget._currentStep >= 2
                       ? StepState.complete
                       : StepState.disabled,
                 ),
@@ -328,25 +459,51 @@ class _BodyState extends State<Body> {
   }
 }
 
-class BottomNav extends StatelessWidget {
+class BottomNav extends StatefulWidget {
+  final Function continued;
+  final Function cancel;
+  final int step;
+  // BottomNav(this.continued);
+  const BottomNav({Key key, this.continued, this.cancel, this.step})
+      : super(key: key);
+
+  @override
+  _BottomNavState createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State<BottomNav> {
+  void _itemTapped(int index) {
+    print(widget.step);
+    if (widget.step >= 2) {
+      print("finish");
+    }
+    index == 1 ? widget.continued() : widget.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
+      items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Cancel',
           backgroundColor: Colors.red,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.business),
-          label: 'Next',
-          backgroundColor: Colors.green,
-        ),
+        widget.step >= 2
+            ? BottomNavigationBarItem(
+                icon: Icon(Icons.business),
+                label: 'Finish',
+                backgroundColor: Colors.green,
+              )
+            : BottomNavigationBarItem(
+                icon: Icon(Icons.business),
+                label: 'Next',
+                backgroundColor: Colors.green,
+              ),
       ],
       currentIndex: 1,
       // selectedItemColor: Colors.amber[800],
-      // onTap: _BodyState.continued(),
+      onTap: _itemTapped,
     );
   }
 }
