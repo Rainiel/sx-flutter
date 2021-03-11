@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/rendering/box.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:boilerplate/services/firebase_db.dart';
 
 class StepperPage extends StatefulWidget {
   @override
@@ -9,7 +10,23 @@ class StepperPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<StepperPage> {
+  var myInstance = new BodyInstance();
   int _currentStep = 0;
+  var devices = [];
+  var box = [
+    [
+      {"box": 1, "status": false},
+      {"box": 2, "status": false}
+    ],
+    [
+      {"box": 3, "status": false},
+      {"box": 4, "status": false}
+    ],
+    [
+      {"box": 5, "status": false},
+      {"box": 6, "status": false}
+    ]
+  ];
 
   continued() {
     _currentStep < 2 ? setState(() => _currentStep += 1) : null;
@@ -19,15 +36,41 @@ class _TabsPageState extends State<StepperPage> {
     _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
   }
 
+  _getDevices() async {
+    List array = [];
+    await FirebaseDatabase.instance
+        .reference()
+        .child("device")
+        .once()
+        .then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic>.from(snapshot.value).forEach((key, values) {
+        array.add({"id": key, ...values, "selected": false});
+      });
+    });
+    setState(() {
+      print(array);
+      devices = array;
+    });
+  }
+
+  @override
+  void initState() {
+    _getDevices();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Storage X ')),
-      // drawer: CustomDrawer(),
-      body: Body(_currentStep),
-      bottomNavigationBar:
-          BottomNav(continued: continued, cancel: cancel, step: _currentStep),
-    );
+        appBar: AppBar(title: Text('Storage X ')),
+        // drawer: CustomDrawer(),
+        body: Body(_currentStep, myInstance, box, devices),
+        bottomNavigationBar: BottomNav(
+            continued: continued,
+            cancel: cancel,
+            step: _currentStep,
+            instance: myInstance,
+            box: box));
   }
 }
 
@@ -83,8 +126,11 @@ class BodyInstance {
 }
 
 class Body extends StatefulWidget {
-  int _currentStep;
-  Body(this._currentStep);
+  final int _currentStep;
+  final myInstance;
+  final box;
+  final devices;
+  Body(this._currentStep, this.myInstance, this.box, this.devices);
 
   @override
   _BodyState createState() => _BodyState();
@@ -93,48 +139,34 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   // int _currentStep = 0;
   // var selectedDevice;
-  var myInstance = new BodyInstance();
+  // var myInstance = new BodyInstance();
   var colorG = Colors.green[400];
-  var devices = [];
-  var box = [
-    [
-      {"box": 1, "status": false},
-      {"box": 2, "status": false}
-    ],
-    [
-      {"box": 3, "status": false},
-      {"box": 4, "status": false}
-    ],
-    [
-      {"box": 5, "status": false},
-      {"box": 6, "status": false}
-    ]
-  ];
+  // var devices = [];
   var selectedBoxIndex = null;
   final icons = IconData(0xe593, fontFamily: 'MaterialIcons');
 
-  _getData() async {
-    List array = [];
-    await FirebaseDatabase.instance
-        .reference()
-        .child("device")
-        .once()
-        .then((DataSnapshot snapshot) {
-      Map<dynamic, dynamic>.from(snapshot.value).forEach((key, values) {
-        array.add({"id": key, ...values, "selected": false});
-      });
-    });
-    setState(() {
-      print(array);
-      devices = array;
-    });
-  }
+  // _getDevices() async {
+  //   List array = [];
+  //   await FirebaseDatabase.instance
+  //       .reference()
+  //       .child("device")
+  //       .once()
+  //       .then((DataSnapshot snapshot) {
+  //     Map<dynamic, dynamic>.from(snapshot.value).forEach((key, values) {
+  //       array.add({"id": key, ...values, "selected": false});
+  //     });
+  //   });
+  //   setState(() {
+  //     print(array);
+  //     devices = array;
+  //   });
+  // }
 
-  @override
-  void initState() {
-    _getData();
-    super.initState();
-  }
+  // @override
+  // void initState() {
+  //   _getDevices();
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -168,10 +200,10 @@ class _BodyState extends State<Body> {
                   content: Expanded(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: devices.length,
+                      itemCount: widget.devices.length,
                       itemBuilder: (context, index) {
                         return Card(
-                          shape: devices[index]["selected"]
+                          shape: widget.devices[index]["selected"]
                               ? new RoundedRectangleBorder(
                                   side: new BorderSide(
                                       color: Colors.blue, width: 2.0),
@@ -182,15 +214,16 @@ class _BodyState extends State<Body> {
                                   borderRadius: BorderRadius.circular(4.0)),
                           child: ListTile(
                             leading: Icon(icons),
-                            title: Text(devices[index]["location"]),
+                            title: Text(widget.devices[index]["location"]),
                             trailing: Checkbox(
-                                value: devices[index]["selected"],
+                                value: widget.devices[index]["selected"],
                                 onChanged: (value) {}),
                             onTap: () {
                               setState(() {
-                                devices[index]["selected"] =
-                                    !devices[index]["selected"];
-                                myInstance.device = devices[index];
+                                widget.devices[index]["selected"] =
+                                    !widget.devices[index]["selected"];
+                                widget.myInstance.device =
+                                    widget.devices[index];
                               });
                             },
                           ),
@@ -208,15 +241,35 @@ class _BodyState extends State<Body> {
                   content: Column(
                     children: <Widget>[
                       TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            widget.myInstance.info.yourname = value;
+                          });
+                        },
                         decoration: InputDecoration(labelText: 'Your Name'),
                       ),
                       TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            widget.myInstance.info.yourcontact = value;
+                          });
+                        },
                         decoration: InputDecoration(labelText: 'Your Contact'),
                       ),
                       TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            widget.myInstance.info.cname = value;
+                          });
+                        },
                         decoration: InputDecoration(labelText: 'Claimant Name'),
                       ),
                       TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            widget.myInstance.info.ccontact = value;
+                          });
+                        },
                         decoration:
                             InputDecoration(labelText: 'Claimant Contact'),
                       ),
@@ -231,7 +284,7 @@ class _BodyState extends State<Body> {
                   title: new Text('Locker'),
                   content: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: box.length,
+                      itemCount: widget.myInstance.device == null ? 0 : widget.myInstance.device["locker"].length,
                       itemBuilder: (context, index) {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -240,25 +293,26 @@ class _BodyState extends State<Body> {
                               onTap: () => {
                                 if (selectedBoxIndex == null)
                                   {
-                                    setState(() => {
-                                          selectedBoxIndex = index,
-                                          box[index][0]["status"] = true
-                                        })
+                                    setState(() {
+                                      selectedBoxIndex = index;
+                                      widget.myInstance.device["locker"][index][0]["status"] = true;
+                                    })
                                   }
                                 else
                                   {
-                                    setState(() => {
-                                          box[selectedBoxIndex][0]["status"] =
-                                              false,
-                                          box[selectedBoxIndex][1]["status"] =
-                                              false,
-                                          selectedBoxIndex = index,
-                                          box[index][0]["status"] = true
-                                        })
+                                    setState(() {
+                                      widget.myInstance.device["locker"][selectedBoxIndex][0]
+                                          ["status"] = false;
+                                      widget.myInstance.device["locker"][selectedBoxIndex][1]
+                                          ["status"] = false;
+                                      selectedBoxIndex = index;
+                                      widget.myInstance.device["locker"][index][0]["status"] = true;
+                                    })
                                   }
                               },
                               child: Container(
-                                  decoration: box[index][0]["status"] == true
+                                  decoration: widget.myInstance.device["locker"][index][0]["status"] ==
+                                          true
                                       ? BoxDecoration(
                                           color: Colors.green[400],
                                           borderRadius: BorderRadius.all(
@@ -273,178 +327,55 @@ class _BodyState extends State<Body> {
                                   margin: EdgeInsets.only(right: 4, bottom: 8),
                                   child: Container(
                                     child: Center(
-                                        child: Text(
-                                            box[index][0]["box"].toString())),
+                                        child: Text(widget.myInstance.device["locker"][index][0]["box"]
+                                            .toString())),
                                   )),
                             ),
                             GestureDetector(
                               onTap: () => {
                                 if (selectedBoxIndex == null)
                                   {
-                                    setState(() => {
-                                          selectedBoxIndex = index,
-                                          box[index][1]["status"] = true
-                                        })
+                                    setState(() {
+                                      selectedBoxIndex = index;
+                                      widget.myInstance.device["locker"][index][1]["status"] = true;
+                                    })
                                   }
                                 else
                                   {
-                                    setState(() => {
-                                          box[selectedBoxIndex][0]["status"] =
-                                              false,
-                                          box[selectedBoxIndex][1]["status"] =
-                                              false,
-                                          selectedBoxIndex = index,
-                                          box[index][1]["status"] = true
-                                        })
+                                    setState(() {
+                                      widget.myInstance.device["locker"][selectedBoxIndex][0]
+                                          ["status"] = false;
+                                      widget.myInstance.device["locker"][selectedBoxIndex][1]
+                                          ["status"] = false;
+                                      selectedBoxIndex = index;
+                                      widget.myInstance.device["locker"][index][1]["status"] = true;
+                                    })
                                   }
                               },
                               child: Container(
-                                decoration: box[index][1]["status"] == true
-                                    ? BoxDecoration(
-                                        color: Colors.green[400],
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10)))
-                                    : BoxDecoration(
-                                        color: Colors.teal[400],
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10))),
+                                decoration:
+                                    widget.myInstance.device["locker"][index][1]["status"] == true
+                                        ? BoxDecoration(
+                                            color: Colors.green[400],
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10)))
+                                        : BoxDecoration(
+                                            color: Colors.teal[400],
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
                                 width: MediaQuery.of(context).size.width * 0.40,
                                 height: 50,
                                 margin: EdgeInsets.only(left: 4, bottom: 8),
                                 child: Container(
                                   child: Center(
-                                      child: Text(
-                                          box[index][1]["box"].toString())),
+                                      child: Text(widget.myInstance.device["locker"][index][1]["box"]
+                                          .toString())),
                                 ),
                               ),
                             ),
                           ],
                         );
                       }),
-                  // content: Stack(
-                  //   children: <Widget>[
-                  //     Column(
-                  //       mainAxisAlignment: MainAxisAlignment.center,
-                  //       children: <Widget>[
-                  //         Row(
-                  //           mainAxisAlignment: MainAxisAlignment.center,
-                  //           children: <Widget>[
-                  //             InkWell(
-                  //               onTap: () =>
-                  //                   setState(() => colorG = Colors.teal[500]),
-                  //               child: Container(
-                  //                   decoration: BoxDecoration(
-                  //                       color: colorG,
-                  //                       borderRadius: BorderRadius.all(
-                  //                           Radius.circular(10))),
-                  //                   width: MediaQuery.of(context).size.width *
-                  //                       0.40,
-                  //                   height: 40,
-                  //                   margin:
-                  //                       EdgeInsets.only(right: 4, bottom: 8),
-                  //                   child: Container(
-                  //                     child: Center(child: Text("box1")),
-                  //                   )),
-                  //             ),
-                  //             InkWell(
-                  //               onTap: () => print("Container 2 pressed"),
-                  //               child: Container(
-                  //                 decoration: BoxDecoration(
-                  //                     color: colorG,
-                  //                     borderRadius: BorderRadius.all(
-                  //                         Radius.circular(10))),
-                  //                 width:
-                  //                     MediaQuery.of(context).size.width * 0.40,
-                  //                 height: 40,
-                  //                 margin: EdgeInsets.only(left: 4, bottom: 8),
-                  //                 child: Container(
-                  //                   child: Center(child: Text("box1")),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //           ],
-                  //         ),
-                  //         Row(
-                  //           mainAxisAlignment: MainAxisAlignment.center,
-                  //           children: <Widget>[
-                  //             InkWell(
-                  //               onTap: () =>
-                  //                   setState(() => colorG = Colors.teal[500]),
-                  //               child: Container(
-                  //                 decoration: BoxDecoration(
-                  //                     color: colorG,
-                  //                     borderRadius: BorderRadius.all(
-                  //                         Radius.circular(10))),
-                  //                 width:
-                  //                     MediaQuery.of(context).size.width * 0.40,
-                  //                 height: 40,
-                  //                 margin: EdgeInsets.only(right: 4, bottom: 8),
-                  //                 child: Container(
-                  //                   child: Center(child: Text("box1")),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //             InkWell(
-                  //               onTap: () => print("Container 2 pressed"),
-                  //               child: Container(
-                  //                 decoration: BoxDecoration(
-                  //                     color: colorG,
-                  //                     borderRadius: BorderRadius.all(
-                  //                         Radius.circular(10))),
-                  //                 width:
-                  //                     MediaQuery.of(context).size.width * 0.40,
-                  //                 height: 40,
-                  //                 margin: EdgeInsets.only(left: 4, bottom: 8),
-                  //                 child: Container(
-                  //                   child: Center(child: Text("box1")),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //           ],
-                  //         ),
-                  //         Row(
-                  //           mainAxisAlignment: MainAxisAlignment.center,
-                  //           children: <Widget>[
-                  //             InkWell(
-                  //               onTap: () =>
-                  //                   setState(() => colorG = Colors.teal[500]),
-                  //               child: Container(
-                  //                 decoration: BoxDecoration(
-                  //                                                         color: colorG,
-                  //                     borderRadius: BorderRadius.all(
-                  //                         Radius.circular(10))),
-                  //                 width:
-                  //                     MediaQuery.of(context).size.width * 0.40,
-                  //                 height: 40,
-                  //                 margin: EdgeInsets.only(right: 4, bottom: 8),
-                  //                 child: Container(
-                  //                   child: Center(child: Text("box1")),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //             InkWell(
-                  //               onTap: () => {print(myInstance.getValue())},
-                  //               child: Container(
-                  //                 decoration: BoxDecoration(
-                  //                     color: colorG,
-                  //                     borderRadius: BorderRadius.all(
-                  //                         Radius.circular(10))),
-                  //                 width:
-                  //                     MediaQuery.of(context).size.width * 0.40,
-                  //                 height: 40,
-                  //                 margin: EdgeInsets.only(left: 4, bottom: 8),
-                  //                 child: Container(
-                  //                   child: Center(child: Text("box1")),
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //           ],
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ],
-                  // ),
-
                   isActive: widget._currentStep >= 0,
                   state: widget._currentStep >= 2
                       ? StepState.complete
@@ -463,8 +394,16 @@ class BottomNav extends StatefulWidget {
   final Function continued;
   final Function cancel;
   final int step;
+  final instance;
+  final box;
   // BottomNav(this.continued);
-  const BottomNav({Key key, this.continued, this.cancel, this.step})
+  const BottomNav(
+      {Key key,
+      this.continued,
+      this.cancel,
+      this.step,
+      this.instance,
+      this.box})
       : super(key: key);
 
   @override
@@ -475,35 +414,40 @@ class _BottomNavState extends State<BottomNav> {
   void _itemTapped(int index) {
     print(widget.step);
     if (widget.step >= 2) {
-      print("finish");
+      widget.instance.locker = widget.box;
+      print(widget.instance.getValue());
+      FirebaseDb().saveLocker(widget.instance.device, widget.instance.locker);
     }
     index == 1 ? widget.continued() : widget.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Cancel',
-          backgroundColor: Colors.red,
-        ),
-        widget.step >= 2
-            ? BottomNavigationBarItem(
-                icon: Icon(Icons.business),
-                label: 'Finish',
-                backgroundColor: Colors.green,
-              )
-            : BottomNavigationBarItem(
-                icon: Icon(Icons.business),
-                label: 'Next',
-                backgroundColor: Colors.green,
-              ),
-      ],
-      currentIndex: 1,
-      // selectedItemColor: Colors.amber[800],
-      onTap: _itemTapped,
+    return Theme(
+      data: ThemeData(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+      ),
+      child: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Cancel',
+          ),
+          widget.step >= 2
+              ? BottomNavigationBarItem(
+                  icon: Icon(Icons.business),
+                  label: 'Finish',
+                )
+              : BottomNavigationBarItem(
+                  icon: Icon(Icons.business),
+                  label: 'Next',
+                ),
+        ],
+        currentIndex: 1,
+        selectedItemColor: Colors.black38,
+        onTap: _itemTapped,
+      ),
     );
   }
 }
