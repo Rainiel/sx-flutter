@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/rendering/box.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:boilerplate/services/firebase_db.dart';
+import 'package:sweetalert/sweetalert.dart';
 
 class StepperPage extends StatefulWidget {
   @override
@@ -284,7 +285,9 @@ class _BodyState extends State<Body> {
                   title: new Text('Locker'),
                   content: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: widget.myInstance.device == null ? 0 : widget.myInstance.device["locker"].length,
+                      itemCount: widget.myInstance.device == null
+                          ? 0
+                          : widget.myInstance.device["locker"].length,
                       itemBuilder: (context, index) {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -295,39 +298,51 @@ class _BodyState extends State<Body> {
                                   {
                                     setState(() {
                                       selectedBoxIndex = index;
-                                      widget.myInstance.device["locker"][index][0]["status"] = true;
+                                      widget.myInstance.device["locker"][index]
+                                          [0]["selected"] = true;
                                     })
                                   }
                                 else
                                   {
                                     setState(() {
-                                      widget.myInstance.device["locker"][selectedBoxIndex][0]
-                                          ["status"] = false;
-                                      widget.myInstance.device["locker"][selectedBoxIndex][1]
-                                          ["status"] = false;
+                                      widget.myInstance.device["locker"]
+                                              [selectedBoxIndex][0]["selected"] =
+                                          false;
+                                      widget.myInstance.device["locker"]
+                                              [selectedBoxIndex][1]["selected"] =
+                                          false;
                                       selectedBoxIndex = index;
-                                      widget.myInstance.device["locker"][index][0]["status"] = true;
+                                      widget.myInstance.device["locker"][index]
+                                          [0]["selected"] = true;
                                     })
                                   }
                               },
                               child: Container(
-                                  decoration: widget.myInstance.device["locker"][index][0]["status"] ==
+                                  decoration: widget.myInstance.device["locker"]
+                                              [index][0]["status"] ==
                                           true
                                       ? BoxDecoration(
-                                          color: Colors.green[400],
+                                          color: Colors.red[400],
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(10)))
-                                      : BoxDecoration(
-                                          color: Colors.teal[400],
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10))),
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.40,
+                                      : widget.myInstance.device["locker"]
+                                                  [index][0]["selected"] ==
+                                              true
+                                          ? BoxDecoration(
+                                              color: Colors.green[200],
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10)))
+                                          : BoxDecoration(
+                                              color: Colors.teal[400],
+                                              borderRadius:
+                                                  BorderRadius.all(Radius.circular(10))),
+                                  width: MediaQuery.of(context).size.width * 0.40,
                                   height: 50,
                                   margin: EdgeInsets.only(right: 4, bottom: 8),
                                   child: Container(
                                     child: Center(
-                                        child: Text(widget.myInstance.device["locker"][index][0]["box"]
+                                        child: Text(widget.myInstance
+                                            .device["locker"][index][0]["box"]
                                             .toString())),
                                   )),
                             ),
@@ -337,26 +352,38 @@ class _BodyState extends State<Body> {
                                   {
                                     setState(() {
                                       selectedBoxIndex = index;
-                                      widget.myInstance.device["locker"][index][1]["status"] = true;
+                                      widget.myInstance.device["locker"][index]
+                                          [1]["selected"] = true;
                                     })
                                   }
                                 else
                                   {
                                     setState(() {
-                                      widget.myInstance.device["locker"][selectedBoxIndex][0]
-                                          ["status"] = false;
-                                      widget.myInstance.device["locker"][selectedBoxIndex][1]
-                                          ["status"] = false;
+                                      widget.myInstance.device["locker"]
+                                              [selectedBoxIndex][0]["selected"] =
+                                          false;
+                                      widget.myInstance.device["locker"]
+                                              [selectedBoxIndex][1]["selected"] =
+                                          false;
                                       selectedBoxIndex = index;
-                                      widget.myInstance.device["locker"][index][1]["status"] = true;
+                                      widget.myInstance.device["locker"][index]
+                                          [1]["selected"] = true;
                                     })
                                   }
                               },
                               child: Container(
-                                decoration:
-                                    widget.myInstance.device["locker"][index][1]["status"] == true
+                                decoration: widget.myInstance.device["locker"]
+                                            [index][1]["status"] ==
+                                        true
+                                    ? BoxDecoration(
+                                        color: Colors.red[400],
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)))
+                                    : widget.myInstance.device["locker"][index]
+                                                [1]["selected"] ==
+                                            true
                                         ? BoxDecoration(
-                                            color: Colors.green[400],
+                                            color: Colors.green[200],
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(10)))
                                         : BoxDecoration(
@@ -368,7 +395,8 @@ class _BodyState extends State<Body> {
                                 margin: EdgeInsets.only(left: 4, bottom: 8),
                                 child: Container(
                                   child: Center(
-                                      child: Text(widget.myInstance.device["locker"][index][1]["box"]
+                                      child: Text(widget.myInstance
+                                          .device["locker"][index][1]["box"]
                                           .toString())),
                                 ),
                               ),
@@ -412,11 +440,24 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   void _itemTapped(int index) {
-    print(widget.step);
-    if (widget.step >= 2) {
+    if (widget.step >= 2 && index == 1) {
       widget.instance.locker = widget.box;
-      print(widget.instance.getValue());
-      FirebaseDb().saveLocker(widget.instance.device, widget.instance.locker);
+      SweetAlert.show(context,
+                      title: "Are you sure?",
+                      subtitle: "Lorem Ipsum",
+                      style: SweetAlertStyle.confirm,
+                      showCancelButton: true, onPress: (bool isConfirm) {
+        if (isConfirm) {
+                FirebaseDb().saveLocker(widget.instance.device, widget.instance.locker);
+          // SweetAlert.show(context,subtitle: "Deleting...", style: SweetAlertStyle.loading);
+          // new Future.delayed(new Duration(seconds: 2),(){
+          //   SweetAlert.show(context,subtitle: "Success!", style: SweetAlertStyle.success);
+          // });
+          // return false to keep dialog
+          // print("loslolsol");
+          // return false;
+        }
+      });
     }
     index == 1 ? widget.continued() : widget.cancel();
   }
