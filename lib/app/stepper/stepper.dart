@@ -448,7 +448,7 @@ class _BottomNavState extends State<BottomNav> {
                       style: SweetAlertStyle.confirm,
                       showCancelButton: true, onPress: (bool isConfirm) {
         if (isConfirm) {
-                FirebaseDb().saveLocker(widget.instance.device, widget.instance.locker);
+          FirebaseDb().saveLocker(widget.instance.device, widget.instance.locker);
           // SweetAlert.show(context,subtitle: "Deleting...", style: SweetAlertStyle.loading);
           // new Future.delayed(new Duration(seconds: 2),(){
           //   SweetAlert.show(context,subtitle: "Success!", style: SweetAlertStyle.success);

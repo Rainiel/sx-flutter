@@ -4,7 +4,7 @@ import 'dart:developer';
 
 class FirebaseDb {
   final databaseReference = FirebaseDatabase.instance.reference();
-  Future<void> saveLocker(device, locker) async {
+  Future<bool> saveLocker(device, locker) async {
     try {
       var deviceId = device["id"];
       List deviceLocker = device["locker"];
@@ -22,8 +22,10 @@ class FirebaseDb {
         }
       }
       log('$deviceLocker');
-      
-      // databaseReference.child('device/$deviceId/locker').set(device["locker"]);
-    } catch (e) {}
+      databaseReference.child('device/$deviceId/locker').set(deviceLocker);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
