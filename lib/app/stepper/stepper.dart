@@ -306,11 +306,11 @@ class _BodyState extends State<Body> {
                                   {
                                     setState(() {
                                       widget.myInstance.device["locker"]
-                                              [selectedBoxIndex][0]["selected"] =
-                                          false;
+                                              [selectedBoxIndex][0]
+                                          ["selected"] = false;
                                       widget.myInstance.device["locker"]
-                                              [selectedBoxIndex][1]["selected"] =
-                                          false;
+                                              [selectedBoxIndex][1]
+                                          ["selected"] = false;
                                       selectedBoxIndex = index;
                                       widget.myInstance.device["locker"][index]
                                           [0]["selected"] = true;
@@ -360,11 +360,11 @@ class _BodyState extends State<Body> {
                                   {
                                     setState(() {
                                       widget.myInstance.device["locker"]
-                                              [selectedBoxIndex][0]["selected"] =
-                                          false;
+                                              [selectedBoxIndex][0]
+                                          ["selected"] = false;
                                       widget.myInstance.device["locker"]
-                                              [selectedBoxIndex][1]["selected"] =
-                                          false;
+                                              [selectedBoxIndex][1]
+                                          ["selected"] = false;
                                       selectedBoxIndex = index;
                                       widget.myInstance.device["locker"][index]
                                           [1]["selected"] = true;
@@ -443,12 +443,13 @@ class _BottomNavState extends State<BottomNav> {
     if (widget.step >= 2 && index == 1) {
       widget.instance.locker = widget.box;
       SweetAlert.show(context,
-                      title: "Are you sure?",
-                      subtitle: "Lorem Ipsum",
-                      style: SweetAlertStyle.confirm,
-                      showCancelButton: true, onPress: (bool isConfirm) {
+          title: "Are you sure?",
+          subtitle: "Lorem Ipsum",
+          style: SweetAlertStyle.confirm,
+          showCancelButton: true, onPress: (bool isConfirm) {
         if (isConfirm) {
-          FirebaseDb().saveLocker(widget.instance.device, widget.instance.locker);
+          FirebaseDb()
+              .saveLocker(widget.instance.device, widget.instance.locker);
           // SweetAlert.show(context,subtitle: "Deleting...", style: SweetAlertStyle.loading);
           // new Future.delayed(new Duration(seconds: 2),(){
           //   SweetAlert.show(context,subtitle: "Success!", style: SweetAlertStyle.success);
@@ -456,6 +457,7 @@ class _BottomNavState extends State<BottomNav> {
           // return false to keep dialog
           // print("loslolsol");
           // return false;
+          Navigator.pop(context);
         }
       });
     }
